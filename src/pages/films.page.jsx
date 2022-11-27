@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import { filterFilmsByDirector } from "./helpers/film.helpers";
-import { getListOf } from "./helpers/film.helpers";
+import { useState, useEffect } from "react";
+import { filterFilmsByDirector, getListOf, getFilmStats } from "./helpers/film.helpers";
+import { Link } from "react-router-dom";
 
 function FilmsPage(props) {
   let [list, setList] = useState([]);
   let [searchDirector, setSearchDirector] = useState("");
+  
 
   function getFilms() {
     fetch("https://ghibliapi.herokuapp.com/films")
@@ -20,13 +20,14 @@ function FilmsPage(props) {
 
   let filmsByDirector = filterFilmsByDirector(list, searchDirector);
   let directors = getListOf(list, "director");
+  let { avg_score, total, latest } = getFilmStats(filmsByDirector);
 
   return (
     <div>
       <h1>"Studio Ghibli Films"</h1>
       <form action="">
         <div className="form-group">
-          <label htmlFor="pickDirector">Pick Directors:</label>
+          <label htmlFor="pickDirector">Pick Director:</label>
           <select
             name=""
             id="pickDirector"
@@ -46,6 +47,20 @@ function FilmsPage(props) {
           </select>
         </div>
       </form>
+      <div>
+        <div>
+          <span># Of Films</span>
+          <span>{total}</span>
+        </div>
+        <div>
+          <span>Average Rating</span>
+          <span>{avg_score.toFixed(2)}</span>
+        </div>
+        <div>
+          <span>Latest Film</span>
+          <span>{latest}</span>
+        </div>
+      </div>
       <ul>
         {filmsByDirector.length > 0
           ? filmsByDirector.map((element) => {
@@ -59,7 +74,11 @@ function FilmsPage(props) {
               );
             })
           : list.map((element) => {
-              return <li key={element.id}>{element.title}</li>;
+              return (
+                <li key={element.id}>
+                  <Link to={`${element.id}`}>{element.title}</Link>
+                </li>
+              );
             })}
       </ul>
     </div>
